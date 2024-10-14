@@ -1,17 +1,14 @@
 package pe.edu.cibertec.Patotas_frontend_wc.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import pe.edu.cibertec.Patotas_frontend_wc.client.AutenticacionClient;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LoginRequestDTO;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LoginResponseDTO;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LogoutRequestDTO;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LogoutResponseDTO;
 import pe.edu.cibertec.Patotas_frontend_wc.viewmodel.LoginModel;
-import pe.edu.cibertec.Patotas_frontend_wc.viewmodel.LogoutModel;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
@@ -24,7 +21,12 @@ public class LoginControllerAsync {
     @Autowired
     WebClient webClientAutenticacion;
 
-
+    @GetMapping("/inicio")
+    public String inicio(Model model) {
+        LoginModel loginModel = new LoginModel("00", "", "");
+        model.addAttribute("loginModel", loginModel);
+        return "inicio";
+    }
 
     @PostMapping("/autenticar-async")
     public Mono<LoginResponseDTO> autenticar(@RequestBody LoginRequestDTO loginRequestDTO) {
