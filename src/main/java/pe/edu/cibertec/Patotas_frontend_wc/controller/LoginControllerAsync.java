@@ -1,11 +1,20 @@
 package pe.edu.cibertec.Patotas_frontend_wc.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
+import pe.edu.cibertec.Patotas_frontend_wc.client.AutenticacionClient;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LoginRequestDTO;
 import pe.edu.cibertec.Patotas_frontend_wc.dto.LoginResponseDTO;
+import pe.edu.cibertec.Patotas_frontend_wc.dto.LogoutRequestDTO;
+import pe.edu.cibertec.Patotas_frontend_wc.dto.LogoutResponseDTO;
+import pe.edu.cibertec.Patotas_frontend_wc.viewmodel.LoginModel;
+import pe.edu.cibertec.Patotas_frontend_wc.viewmodel.LogoutModel;
 import reactor.core.publisher.Mono;
+
+import java.util.Date;
 
 @RestController
 @RequestMapping("/login")
@@ -14,6 +23,8 @@ public class LoginControllerAsync {
 
     @Autowired
     WebClient webClientAutenticacion;
+
+
 
     @PostMapping("/autenticar-async")
     public Mono<LoginResponseDTO> autenticar(@RequestBody LoginRequestDTO loginRequestDTO) {
@@ -44,6 +55,37 @@ public class LoginControllerAsync {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return Mono.just(new LoginResponseDTO("99", "Error: Autenticacion fallida", "", ""));
+        }
+
+    }
+
+    @PostMapping("/logout-async")
+    public Mono<LogoutResponseDTO> logout(@RequestBody LogoutRequestDTO logoutRequestDTO) {
+
+        // Validar campos de entrada
+        if (logoutRequestDTO.tipoDocumento() == null || logoutRequestDTO.tipoDocumento().trim().length() == 0 ||
+                logoutRequestDTO.numeroDocumento() == null || logoutRequestDTO.numeroDocumento().trim().length() == 0) {
+
+            return Mono.just(new LogoutResponseDTO(false, null, "No se contraron datos de usuario"));
+        }
+
+        try {
+            return webClientAutenticacion.post()
+                    .uri("/logout")
+                    .body(Mono.just(logoutRequestDTO), LogoutRequestDTO.class)
+                    .retrieve()
+                    .bodyToMono(LogoutResponseDTO.class)
+                    .flatMap(response -> {
+                        if(response.resultado().equals(true)) {
+                            return Mono.just(new LogoutResponseDTO(true, new Date(), "No error"));
+                        } else {
+                            return Mono.just(new LogoutResponseDTO(false, null, "Error"));
+                        }
+                    });
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Mono.just(new LogoutResponseDTO(false, null, ""));
         }
 
     }
